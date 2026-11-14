@@ -1,0 +1,29 @@
+{
+  "source": "sample",
+  "cards": [
+    {
+      "id": "loci-1",
+      "cluster": "Memory techniques",
+      "front": "What is the method of loci?",
+      "back": "Placing vivid images of what you want to remember at locations along a familiar route, then recalling them by walking the route in your mind."
+    },
+    {
+      "id": "loci-2",
+      "cluster": "Memory techniques",
+      "front": "Why do memory palaces work?",
+      "back": "Spatial memory is strong and well ordered, so tying abstract facts to places borrows that structure."
+    },
+    {
+      "id": "srs-1",
+      "cluster": "Spaced repetition",
+      "front": "What is the spacing effect?",
+      "back": "Reviews spread out over time produce longer-lasting memory than the same number of reviews crammed together."
+    },
+    {
+      "id": "srs-2",
+      "cluster": "Spaced repetition",
+      "front": "What does an SRS scheduler decide?",
+      "back": "When each card is next due, based on how well you recalled it last time."
+    }
+  ]
+}
