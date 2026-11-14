@@ -1,10 +1,7 @@
 -- Remembrall - feasibility probe (UE4SS Lua mod)
 --
---   F5          place next flashcard at crosshair
---   Revelio     flip the card you are looking at (or press F6)
---   Leviosa     move a card; it floats where you let go (native game spell)
---   Ctrl+F5     remove everything this mod spawned
---   Ctrl+F6     reload ipc\cards.json
+-- Keys are set in config.lua (defaults: F5 place, Ctrl+F5 clear, F6 flip,
+-- Ctrl+F6 reload deck). Revelio flips a card; Leviosa moves one.
 --
 -- Results go to UE4SS.log (lines tagged [Remembrall]) and ipc\events.jsonl.
 
@@ -43,8 +40,35 @@ pcall(Spells.install)
 local okBridge, errBridge = pcall(function() require("bridge").start() end)
 if not okBridge then C.log("bridge not started: %s", tostring(errBridge)) end
 
-local CTRL = { ModifierKey.CONTROL }
-bind("F5", nil, "place", Cards.placeAtCrosshair)
-bind("F5", CTRL, "clear", Cards.clear)
-bind("F6", nil, "interact", function() Cards.interact() end)
-bind("F6", CTRL, "reload", Cards.loadDeck)
+local okCfg, config = pcall(require, "config")
+if not okCfg or type(config) ~= "table" or type(config.keys) ~= "table" then
+    C.log("config.lua missing or broken (%s); no keys bound", tostring(config))
+    config = { keys = {} }
+end
+
+local MODIFIERS = { ctrl = ModifierKey.CONTROL, shift = ModifierKey.SHIFT, alt = ModifierKey.ALT }
+local ACTIONS = {
+    place = Cards.placeAtCrosshair,
+    clear = Cards.clear,
+    interact = function() Cards.interact() end,
+    reload = Cards.loadDeck,
+}
+
+for name, fn in pairs(ACTIONS) do
+    local k = config.keys[name]
+    if type(k) == "table" and k.key then
+        local mods = nil
+        for _, m in ipairs(k.mods or {}) do
+            local mk = MODIFIERS[tostring(m):lower()]
+            if mk then
+                mods = mods or {}
+                mods[#mods + 1] = mk
+            else
+                C.log("config: unknown modifier '%s' for %s", tostring(m), name)
+            end
+        end
+        bind(k.key, mods, name, fn)
+    else
+        C.log("config: no key for %s", name)
+    end
+end

@@ -1,8 +1,7 @@
 # Remembrall (Hogwarts Legacy mod)
 
 Turns a book into flashcards and places them around the castle so related cards
-sit together. Built on UE4SS (Lua scripting) plus a Python companion app,
-the same architecture Sonorus uses.
+sit together. Built on UE4SS (Lua scripting) plus a Python companion app.
 
 The name: Neville's Remembrall glows when he has forgotten something but can't tell
 him what. This one puts what you forgot back in front of you, at the spot in the
@@ -28,7 +27,9 @@ castle where you left it (the method of loci, or "memory palace").
 | **Ctrl+F6** | Reload `ipc/cards.json` |
 | **Ctrl+R** | UE4SS hot reload of all Lua mods. Crash-prone: prefer `python tools/game.py reload` |
 
-F7/F11 belong to Sonorus (disabled), F10 to the UE console.
+F5/F6 and their Ctrl combinations are defaults. Other mods may use the same keys; change any
+of them in [`Scripts/config.lua`](mod/Remembrall/Scripts/config.lua), then restart the game
+(or run `python tools/game.py reload`).
 
 ## Setup on a new machine
 
@@ -108,7 +109,7 @@ python tools/install.py --disable-ue4ss  # turns UE4SS off entirely
 ## Layout
 
 ```
-mod/Remembrall/Scripts/   UE4SS Lua mod (main, common, cards, spells, bridge; lib/json = rxi, MIT)
+mod/Remembrall/Scripts/   UE4SS Lua mod (main, config, common, cards, spells, bridge; lib/json = rxi, MIT)
 mod/Remembrall/ipc/       files shared between the mod and the companion (gitignored)
 companion/                  Python app: audio now; book -> cards -> clusters later
 tools/install.py            install / uninstall / toggle UE4SS
