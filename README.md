@@ -26,12 +26,38 @@ the same architecture Sonorus uses.
 
 F7/F11 belong to Sonorus (disabled), F10 to the UE console.
 
+## Setup on a new machine
+
+Windows only (the tools use Win32 for input and screenshots).
+
+1. **Hogwarts Legacy** on Steam. Display mode *Windowed Fullscreen* or *Windowed*. A modest
+   resolution (developed at 1440x900, low graphics) keeps screenshots small and the game light.
+2. **UE4SS v3.0.1** (developed against `v3.0.1 Beta #0`, from the RE-UE4SS GitHub releases).
+   Unzip it into `Hogwarts Legacy\Phoenix\Binaries\Win64\`, so that `dwmapi.dll` and the
+   `ue4ss\` folder sit next to `HogwartsLegacy.exe`. The default settings work. Its bundled
+   mods (BPModLoaderMod, ConsoleEnablerMod, ...) can stay as they are.
+3. **Python 3.10+** with Pillow: `pip install pillow` (only `tools/game.py` needs it).
+4. **This repo**, cloned anywhere. If the game isn't in `D:\SteamLibrary\steamapps\common\Hogwarts Legacy`,
+   set `HL_GAME_DIR` to the game folder (or pass `--game` to `install.py`); both tools read it.
+5. **Link the mod into the game** (a directory junction, so edits here are live; no admin needed):
+
+   ```bash
+   python tools/install.py            # junction into ue4ss/Mods + enable in mods.txt
+   python tools/install.py --status   # check: UE4SS enabled, link present, MemoryPalace : 1
+   ```
+
+6. **Test save.** `game.py start` loads the character **Kiki Kirishima**. It comes over
+   through Steam Cloud if that's on. Otherwise copy the save folder from
+   `%LOCALAPPDATA%\Hogwarts Legacy\Saved\SaveGames\`, or pass `--save "<your character>"`
+   (the courtyard teleport assumes that save is past the intro and can reach Hogwarts).
+7. **Check it end to end:** `python tools/game.py start`, then `python tools/game.py shot`.
+
 ## Run it
 
 ```bash
-python tools/install.py                 # junction into ue4ss/Mods + enable in mods.txt
-python tools/install.py --enable-ue4ss  # only if UE4SS is off (dwmapi.dll.bak)
-python companion/companion.py           # leave running; speaks cards, prints a summary
+python tools/game.py start              # or launch the game normally
+python companion/companion.py           # optional; speaks cards, prints a summary
+python tools/install.py --enable-ue4ss  # only if UE4SS was turned off (dwmapi.dll.bak)
 ```
 
 Logs: `Phoenix/Binaries/Win64/ue4ss/UE4SS.log` (lines tagged `[MemoryPalace]`) and
