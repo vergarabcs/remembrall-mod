@@ -1,13 +1,13 @@
 ---
 name: test-in-game
-description: API reference for seeing and controlling the running Hogwarts Legacy game from the terminal through tools/game.py and the mod's bridge. Covers screenshots, keys and mouse, camera, teleport, running Lua inside the mod, console commands, reloading the mod and reading its logs. Use it whenever you need to check a Memory Palace mod or companion change in game, take or read a game screenshot, drive the player or menus, or inspect live game state, even if the user only says "test it", "try it" or "does it work".
+description: API reference for seeing and controlling the running Hogwarts Legacy game from the terminal through tools/game.py and the mod's bridge. Covers screenshots, keys and mouse, camera, teleport, running Lua inside the mod, console commands, reloading the mod and reading its logs. Use it whenever you need to check a Remembrall mod or companion change in game, take or read a game screenshot, drive the player or menus, or inspect live game state, even if the user only says "test it", "try it" or "does it work".
 ---
 
 # Controlling the game: tools/game.py + bridge.lua
 
 Two channels, both used through `python tools/game.py <command>` from the repo root:
 
-- **Bridge** (mod side). The tool writes `mod/MemoryPalace/ipc/cmd.json`
+- **Bridge** (mod side). The tool writes `mod/Remembrall/ipc/cmd.json`
   `{id, t, cmd, args}`. `Scripts/bridge.lua` polls it every 100 ms on the game thread,
   deletes it, runs `B.cmds[cmd](args)` and writes `ipc/res.json` `{id, ok, result|err}`.
   It runs one command at a time and drops commands older than 30 s. It works with the
@@ -39,7 +39,7 @@ If the mod doesn't answer, it reports that the game isn't running, is still load
 | `focus` | Windows | brings the game to the front |
 | `wait ["<lua expr>"]` [`--timeout --interval`] | bridge | polls until the expression is truthy and prints it; with no expression, waits until `phase` is `world` |
 | `reload` [`--all` [`--force`]] | bridge | restarts only this mod (`RestartCurrentMod`) and waits for the bridge; `--all` = UE4SS Ctrl+R |
-| `log` [`-n N`] [`--all`] | file | tail of UE4SS.log (`[MemoryPalace]` lines unless `--all`) |
+| `log` [`-n N`] [`--all`] | file | tail of UE4SS.log (`[Remembrall]` lines unless `--all`) |
 | `launch` [`--timeout S`] | Steam + bridge | only starts the game and waits until the bridge answers (title screen); prefer `start` |
 
 Key names: `a`–`z`, `0`–`9`, `f1`–`f24`, `ctrl shift alt space enter esc tab backspace
@@ -131,5 +131,5 @@ To find other UI, list the visible widgets:
 - **Autosave.** The game autosaves, so teleports and other changes persist into the save.
 - **Crashes.** If the window disappears, read `log --all -n 30` and the Windows event log
   (`Get-WinEvent`, provider "Windows Error Reporting") for the exception code before relaunching.
-- **Evidence.** Mod actions log `[MemoryPalace]` lines (`log`), mod→companion events go to
+- **Evidence.** Mod actions log `[Remembrall]` lines (`log`), mod→companion events go to
   `ipc/events.jsonl`, and a screenshot only counts once you've Read the PNG.

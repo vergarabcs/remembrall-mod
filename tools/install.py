@@ -1,4 +1,4 @@
-"""Install / uninstall the MemoryPalace mod into a Hogwarts Legacy UE4SS setup.
+"""Install / uninstall the Remembrall mod into a Hogwarts Legacy UE4SS setup.
 
     python tools/install.py               # link mod into ue4ss/Mods and enable it
     python tools/install.py --status      # show what is installed and enabled
@@ -19,8 +19,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-MOD_SRC = ROOT / "mod" / "MemoryPalace"
-MOD_NAME = "MemoryPalace"
+MOD_SRC = ROOT / "mod" / "Remembrall"
+MOD_NAME = "Remembrall"
 DEFAULT_GAME = Path(r"D:\SteamLibrary\steamapps\common\Hogwarts Legacy")
 
 

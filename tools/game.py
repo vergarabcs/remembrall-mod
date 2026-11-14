@@ -1,4 +1,4 @@
-"""Drive Hogwarts Legacy and the MemoryPalace mod from the command line.
+"""Drive Hogwarts Legacy and the Remembrall mod from the command line.
 
 Two channels:
   * The mod's bridge (ipc/cmd.json -> ipc/res.json): state, Lua eval, console
@@ -8,7 +8,7 @@ Two channels:
 
     python tools/game.py ping                      # is the mod answering?
     python tools/game.py state                     # world, player, camera, placed cards
-    python tools/game.py shot                      # -> mod/MemoryPalace/ipc/shots/shot.png
+    python tools/game.py shot                      # -> mod/Remembrall/ipc/shots/shot.png
     python tools/game.py shot --crop 0.3,0.2,0.4,0.6   # zoom: x,y,w,h as fractions
     python tools/game.py lua "return C.playerLocation()"
     python tools/game.py lua "Cards.placeAtCrosshair()"
@@ -21,7 +21,7 @@ Two channels:
     python tools/game.py mouse 300 0               # turn the camera (relative pixels)
     python tools/game.py click [left|right] [--hold MS] [--at 0.25,0.2]
     python tools/game.py focus
-    python tools/game.py log -n 40                 # [MemoryPalace] lines of UE4SS.log
+    python tools/game.py log -n 40                 # [Remembrall] lines of UE4SS.log
     python tools/game.py reload                    # restart just this mod (Lua edits)
     python tools/game.py start                     # launch if needed -> save -> courtyard test spot
     python tools/game.py quit                      # close the game
@@ -45,7 +45,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from install import DEFAULT_GAME  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-IPC = ROOT / "mod" / "MemoryPalace" / "ipc"
+IPC = ROOT / "mod" / "Remembrall" / "ipc"
 SHOTS = IPC / "shots"
 GAME_DIR = Path(os.environ.get("HL_GAME_DIR", DEFAULT_GAME))
 UE4SS_LOG = GAME_DIR / "Phoenix" / "Binaries" / "Win64" / "ue4ss" / "UE4SS.log"
@@ -83,7 +83,7 @@ def bridge(cmd: str, args: dict | None = None, timeout: float = 10.0) -> dict:
     except FileNotFoundError:
         pass
     raise SystemExit(f"No answer from the mod within {timeout:.0f}s "
-                     "(game not running, still loading, or MemoryPalace not loaded?)")
+                     "(game not running, still loading, or Remembrall not loaded?)")
 
 
 def bridge_or_die(cmd: str, args: dict | None = None, timeout: float = 10.0):
@@ -446,7 +446,7 @@ def cmd_log(a):
         raise SystemExit(f"no log at {UE4SS_LOG}")
     lines = UE4SS_LOG.read_text(encoding="utf-8", errors="replace").splitlines()
     if not a.all:
-        lines = [l for l in lines if "[MemoryPalace]" in l]
+        lines = [l for l in lines if "[Remembrall]" in l]
     print("\n".join(lines[-a.n:]))
 
 
@@ -652,7 +652,7 @@ def main() -> None:
     p.add_argument("--dist", type=float, default=250)
     p.add_argument("--no-focus", action="store_true")
 
-    p = sub.add_parser("reload", help="restart the MemoryPalace mod (picks up Lua edits)")
+    p = sub.add_parser("reload", help="restart the Remembrall mod (picks up Lua edits)")
     p.add_argument("--all", action="store_true", help="UE4SS Ctrl+R instead (all mods; crash-prone)")
     p.add_argument("--no-focus", action="store_true")
     p.add_argument("--force", action="store_true", help="with --all: press Ctrl+R even if the mod did not answer")
@@ -685,7 +685,7 @@ def main() -> None:
 
     p = sub.add_parser("log", help="tail UE4SS.log")
     p.add_argument("-n", type=int, default=30)
-    p.add_argument("--all", action="store_true", help="all lines, not just [MemoryPalace]")
+    p.add_argument("--all", action="store_true", help="all lines, not just [Remembrall]")
 
     p = sub.add_parser("launch", help="start the game via Steam and wait for the mod (title screen)")
     p.add_argument("--timeout", type=float, default=240)

@@ -5,7 +5,7 @@ local UEHelpers = require("UEHelpers")
 local json = require("lib.json")
 
 local C = {}
-C.TAG = "[MemoryPalace] "
+C.TAG = "[Remembrall] "
 
 function C.log(fmt, ...)
     local ok, msg = pcall(string.format, fmt, ...)
@@ -14,7 +14,7 @@ end
 
 ---------------------------------------------------------------------------
 -- Paths. UE4SS runs with cwd = Phoenix/Binaries/Win64, and script sources
--- look like "@ue4ss\Mods\MemoryPalace\Scripts\common.lua".
+-- look like "@ue4ss\Mods\Remembrall\Scripts\common.lua".
 ---------------------------------------------------------------------------
 local src = debug.getinfo(1, "S").source:gsub("^@", "")
 C.SCRIPTS_DIR = src:match("^(.*)[/\\][^/\\]+$") or "."

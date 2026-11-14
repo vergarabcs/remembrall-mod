@@ -1,4 +1,4 @@
--- MemoryPalace - feasibility probe (UE4SS Lua mod)
+-- Remembrall - feasibility probe (UE4SS Lua mod)
 --
 --   F5          place next flashcard at crosshair
 --   Revelio     flip the card you are looking at (or press F6)
@@ -6,7 +6,7 @@
 --   Ctrl+F5     remove everything this mod spawned
 --   Ctrl+F6     reload ipc\cards.json
 --
--- Results go to UE4SS.log (lines tagged [MemoryPalace]) and ipc\events.jsonl.
+-- Results go to UE4SS.log (lines tagged [Remembrall]) and ipc\events.jsonl.
 
 local C = require("common")
 local Cards = require("cards")

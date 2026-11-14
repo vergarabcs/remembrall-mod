@@ -1,4 +1,4 @@
 __pycache__/
 *.pyc
-mod/MemoryPalace/ipc/*
-!mod/MemoryPalace/ipc/.gitkeep
+mod/Remembrall/ipc/*
+!mod/Remembrall/ipc/.gitkeep

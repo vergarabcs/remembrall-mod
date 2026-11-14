@@ -1,4 +1,4 @@
-"""MemoryPalace companion (probe version).
+"""Remembrall companion (probe version).
 
 Runs next to the game. Watches ipc/events.jsonl written by the Lua mod and:
   * speaks the flashcard text on `card_open` (unknown #2: audio on interaction)
@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_IPC = ROOT / "mod" / "MemoryPalace" / "ipc"
+DEFAULT_IPC = ROOT / "mod" / "Remembrall" / "ipc"
 
 # Reads one line at a time from stdin and speaks it, cancelling anything still playing.
 _PS_SPEAKER = r"""
@@ -129,7 +129,7 @@ def main() -> int:
     speaker = None if args.no_audio else Speaker()
     summary = Summary()
     print(f"[ipc] watching {ipc / 'events.jsonl'}  (Ctrl+C to quit)")
-    if speaker and speaker.say("Memory palace companion ready."):
+    if speaker and speaker.say("Remembrall companion ready."):
         print("[audio] speech engine started")
 
     try:

@@ -1,8 +1,12 @@
-# Memory Palace (Hogwarts Legacy mod)
+# Remembrall (Hogwarts Legacy mod)
 
 Turns a book into flashcards and places them around the castle so related cards
 sit together. Built on UE4SS (Lua scripting) plus a Python companion app,
 the same architecture Sonorus uses.
+
+The name: Neville's Remembrall glows when he has forgotten something but can't tell
+him what. This one puts what you forgot back in front of you, at the spot in the
+castle where you left it (the method of loci, or "memory palace").
 
 ## Stage 0: feasibility probe (done)
 
@@ -43,7 +47,7 @@ Windows only (the tools use Win32 for input and screenshots).
 
    ```bash
    python tools/install.py            # junction into ue4ss/Mods + enable in mods.txt
-   python tools/install.py --status   # check: UE4SS enabled, link present, MemoryPalace : 1
+   python tools/install.py --status   # check: UE4SS enabled, link present, Remembrall : 1
    ```
 
 6. **Test save.** `game.py start` loads the character **Kiki Kirishima**. It comes over
@@ -60,8 +64,8 @@ python companion/companion.py           # optional; speaks cards, prints a summa
 python tools/install.py --enable-ue4ss  # only if UE4SS was turned off (dwmapi.dll.bak)
 ```
 
-Logs: `Phoenix/Binaries/Win64/ue4ss/UE4SS.log` (lines tagged `[MemoryPalace]`) and
-`mod/MemoryPalace/ipc/events.jsonl`.
+Logs: `Phoenix/Binaries/Win64/ue4ss/UE4SS.log` (lines tagged `[Remembrall]`) and
+`mod/Remembrall/ipc/events.jsonl`.
 
 ## Remote control and screenshots (`tools/game.py`)
 
@@ -72,7 +76,7 @@ everything else is plain Windows (window capture, `SendInput`).
 ```bash
 python tools/game.py start                  # from anywhere: launch, load test save, courtyard spot
 python tools/game.py quit                   # close the game
-python tools/game.py shot                   # -> mod/MemoryPalace/ipc/shots/shot.png
+python tools/game.py shot                   # -> mod/Remembrall/ipc/shots/shot.png
 python tools/game.py shot --crop 0.3,0.2,0.4,0.5   # zoom (x,y,w,h fractions)
 python tools/game.py state                  # world, player, camera, placed cards
 python tools/game.py lua "return C.playerLocation()"   # run Lua inside the mod
@@ -104,8 +108,8 @@ python tools/install.py --disable-ue4ss  # turns UE4SS off entirely
 ## Layout
 
 ```
-mod/MemoryPalace/Scripts/   UE4SS Lua mod (main, common, cards, spells, bridge; lib/json = rxi, MIT)
-mod/MemoryPalace/ipc/       files shared between the mod and the companion (gitignored)
+mod/Remembrall/Scripts/   UE4SS Lua mod (main, common, cards, spells, bridge; lib/json = rxi, MIT)
+mod/Remembrall/ipc/       files shared between the mod and the companion (gitignored)
 companion/                  Python app: audio now; book -> cards -> clusters later
 tools/install.py            install / uninstall / toggle UE4SS
 tools/game.py               screenshots + remote control (see above)
