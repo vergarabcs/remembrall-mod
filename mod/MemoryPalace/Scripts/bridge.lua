@@ -130,6 +130,48 @@ function B.cmds.lua(args)
     return { value = value, printed = printed }
 end
 
+---------------------------------------------------------------------------
+-- Front end: lets game.py `start` get from the title screen into the world.
+---------------------------------------------------------------------------
+local function visibleWidget(cls)
+    for _, w in ipairs(FindAllOf(cls) or {}) do
+        local ok, v = pcall(function() return w:IsVisible() end)
+        if ok and v then return w end
+    end
+    return nil
+end
+
+-- "loading" | "menu" (save list) | "title" (Press Any Key) | "world" | "other"
+function B.cmds.phase()
+    if visibleWidget("UI_BP_NewLoadingScreen_C") then return { phase = "loading" } end
+    if visibleWidget("UI_BP_FrontEnd_Menu_C") then return { phase = "menu" } end
+    if visibleWidget("UI_BP_StartPage_C") then return { phase = "title" } end
+    local p = C.playerLocation()
+    -- At the front end a pawn exists at the origin of /Game/Levels/RootLevel.
+    if p and (p.X ~= 0 or p.Y ~= 0 or p.Z ~= 0) then return { phase = "world", player = p } end
+    return { phase = "other" }
+end
+
+-- Click a save (character) on the front-end menu by its name. This calls the button's
+-- own Blueprint click handler, so it works at any resolution. The handler name comes
+-- from the game's Blueprint and may change with a game update.
+function B.cmds.load_save(args)
+    local want = tostring(args.name or ""):lower()
+    local names = {}
+    for _, b in ipairs(FindAllOf("UI_BP_CharacterSelectButton_C") or {}) do
+        local ok, title = pcall(function() return b.ButtonTitle:GetText():ToString() end)
+        if ok and type(title) == "string" and b:IsVisible() then
+            names[#names + 1] = title
+            if title:lower() == want then
+                b:BndEvt__TheButton_K2Node_ComponentBoundEvent_2_OnButtonClickedEvent__DelegateSignature()
+                return { clicked = title }
+            end
+        end
+    end
+    error(string.format("no save named '%s' on the menu (saves: %s)", tostring(args.name),
+        #names > 0 and table.concat(names, ", ") or "none visible"), 0)
+end
+
 function B.cmds.console(args)
     local cmd = tostring(args.command or "")
     UEHelpers.GetKismetSystemLibrary():ExecuteConsoleCommand(UEHelpers.GetWorld(), cmd, controller())

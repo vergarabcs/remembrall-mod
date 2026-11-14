@@ -44,14 +44,14 @@ Lets a script (or Claude) see and drive the game to check its own work. The mod'
 everything else is plain Windows (window capture, `SendInput`).
 
 ```bash
-python tools/game.py launch                 # start via Steam, wait until the mod answers
-python tools/game.py wait                   # until the loading screen is gone
+python tools/game.py start                  # from anywhere: launch, load test save, courtyard spot
+python tools/game.py quit                   # close the game
 python tools/game.py shot                   # -> mod/MemoryPalace/ipc/shots/shot.png
 python tools/game.py shot --crop 0.3,0.2,0.4,0.5   # zoom (x,y,w,h fractions)
 python tools/game.py state                  # world, player, camera, placed cards
 python tools/game.py lua "return C.playerLocation()"   # run Lua inside the mod
 python tools/game.py key F5                 # keys/combos; --hold MS for longer presses
-python tools/game.py click --at 0.2,0.23    # click a menu item (fractions of the frame)
+python tools/game.py click --at 0.5,0.5     # click (fractions of the frame)
 python tools/game.py look --yaw 90 --pitch -10    # or --card N / --at x,y,z
 python tools/game.py tp X Y Z               # teleport
 python tools/game.py goto-card 1            # stand in front of card 1, facing it

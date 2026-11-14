@@ -23,8 +23,10 @@ Two channels:
     python tools/game.py focus
     python tools/game.py log -n 40                 # [MemoryPalace] lines of UE4SS.log
     python tools/game.py reload                    # restart just this mod (Lua edits)
-    python tools/game.py wait                      # until the loading screen is gone
-    python tools/game.py launch                    # start via Steam, wait for the mod
+    python tools/game.py start                     # launch if needed -> save -> courtyard test spot
+    python tools/game.py quit                      # close the game
+    python tools/game.py wait                      # until in the world (no loading screen/menu)
+    python tools/game.py launch                    # only start via Steam, wait for the mod
 """
 
 from __future__ import annotations
@@ -127,6 +129,7 @@ user32.GetDC.restype = H
 user32.ReleaseDC.argtypes = [wintypes.HWND, H]
 user32.PrintWindow.argtypes = [wintypes.HWND, H, wintypes.UINT]
 user32.MapVirtualKeyW.argtypes = [wintypes.UINT, wintypes.UINT]
+user32.PostMessageW.argtypes = [wintypes.HWND, wintypes.UINT, wintypes.WPARAM, wintypes.LPARAM]
 gdi32.CreateCompatibleDC.argtypes = [H]
 gdi32.CreateCompatibleDC.restype = H
 gdi32.CreateCompatibleBitmap.argtypes = [H, ctypes.c_int, ctypes.c_int]
@@ -179,6 +182,14 @@ def find_window():
 
     user32.EnumWindows(WNDENUMPROC(cb), 0)
     return max(found)[1] if found else None
+
+
+def game_running() -> bool:
+    """True while a HogwartsLegacy.exe process exists (with or without a window)."""
+    import subprocess
+    out = subprocess.run(["tasklist", "/FI", f"IMAGENAME eq {GAME_EXE}", "/NH"],
+                         capture_output=True, text=True, creationflags=0x08000000).stdout
+    return GAME_EXE in out.lower()
 
 
 def window_or_die():
@@ -512,14 +523,90 @@ def cmd_wait(a):
     raise SystemExit(f"timed out; last value: {last}")
 
 
-# Player exists and the loading screen widget is hidden.
-LOADING_DONE = """(function()
-    if not C.playerLocation() then return false end
-    for _, w in ipairs(FindAllOf("UI_BP_NewLoadingScreen_C") or {}) do
-        if w:IsVisible() then return false end
-    end
-    return true
-end)()"""
+# In the world: player placed, no loading screen or front-end menu (bridge.lua `phase`).
+LOADING_DONE = 'B.cmds.phase().phase == "world"'
+
+TEST_SAVE = "Kiki Kirishima"
+# Courtyard spot `start` resets to, so every run begins from the same view
+# (the save itself drifts: the game autosaves wherever tests leave the player).
+TEST_SPOT = {"x": 365504.5, "y": -451606.5, "z": -82092.8, "yaw": -85.2, "pitch": -5.4}
+
+
+def cmd_start(a):
+    """Deterministic: (launch) -> title -> save menu -> load save -> world -> test spot."""
+    t0 = time.time()
+    deadline = t0 + a.timeout
+
+    def say(msg):
+        print(f"[{time.time() - t0:5.0f}s] {msg}", flush=True)
+
+    # Steam ignores a launch while an old process is still exiting, so wait that out
+    # first, and ask again if no process shows up.
+    launched_at = None
+    while time.time() < deadline and not find_window():
+        if game_running():
+            if launched_at is None:
+                say("waiting for an exiting game process")
+                launched_at = 0.0  # say it once
+        elif not launched_at or time.time() - launched_at > 60:
+            os.startfile(f"steam://rungameid/{STEAM_APP_ID}")
+            say("launching via Steam")
+            launched_at = time.time()
+        time.sleep(2)
+    if not find_window():
+        raise SystemExit("game window did not appear")
+
+    last, clicked_at = None, None
+    while time.time() < deadline:
+        try:
+            ph = bridge_or_die("phase", timeout=4)["phase"]
+        except SystemExit:
+            ph = "no bridge yet"  # booting, or the game thread is busy loading
+        if ph != last:
+            say(ph)
+            last = ph
+        if ph == "world":
+            break
+        if ph == "title":
+            ensure_focus(a)
+            press("enter", 200)
+            time.sleep(3)  # the title ignores keys during its intro; retry until the menu shows
+        elif ph == "menu" and (clicked_at is None or time.time() - clicked_at > 20):
+            say(f"loading save '{a.save}'")
+            bridge_or_die("load_save", {"name": a.save})
+            clicked_at = time.time()
+        else:
+            time.sleep(2)
+    else:
+        raise SystemExit(f"not in the world after {a.timeout:.0f}s (last phase: {last})")
+
+    if not a.stay:
+        time.sleep(2)  # loading-screen fade-out; teleports during it can be undone
+        s = TEST_SPOT
+        bridge_or_die("tp", {"x": s["x"], "y": s["y"], "z": s["z"]})
+        ensure_focus(a)
+        time.sleep(1.0)
+        aim(s["yaw"], s["pitch"])
+        say("at the test spot in the courtyard")
+    say("ready")
+
+
+def cmd_quit(a):
+    hwnd = find_window()
+    if not hwnd:
+        print("game not running")
+        return
+    try:
+        bridge_or_die("console", {"command": "quit"}, timeout=5)
+    except SystemExit:
+        user32.PostMessageW(hwnd, 0x0010, 0, 0)  # WM_CLOSE
+    deadline = time.time() + a.timeout
+    while time.time() < deadline:
+        if not game_running():  # the process outlives its window by several seconds
+            print("game closed")
+            return
+        time.sleep(1)
+    raise SystemExit("game process still running")
 
 
 def main() -> None:
@@ -600,8 +687,17 @@ def main() -> None:
     p.add_argument("-n", type=int, default=30)
     p.add_argument("--all", action="store_true", help="all lines, not just [MemoryPalace]")
 
-    p = sub.add_parser("launch", help="start the game via Steam and wait for the mod")
+    p = sub.add_parser("launch", help="start the game via Steam and wait for the mod (title screen)")
     p.add_argument("--timeout", type=float, default=240)
+
+    p = sub.add_parser("start", help="get into the world on the test save at the courtyard test spot")
+    p.add_argument("--save", default=TEST_SAVE, help=f"character name on the save menu (default {TEST_SAVE})")
+    p.add_argument("--stay", action="store_true", help="stay where the save loads instead of the test spot")
+    p.add_argument("--timeout", type=float, default=420)
+    p.add_argument("--no-focus", action="store_true")
+
+    p = sub.add_parser("quit", help="close the game (console 'quit', WM_CLOSE fallback)")
+    p.add_argument("--timeout", type=float, default=90)
 
     a = ap.parse_args()
     c = a.cmd
@@ -666,6 +762,10 @@ def main() -> None:
         cmd_log(a)
     elif c == "launch":
         cmd_launch(a)
+    elif c == "start":
+        cmd_start(a)
+    elif c == "quit":
+        cmd_quit(a)
 
 
 if __name__ == "__main__":
